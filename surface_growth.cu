@@ -2032,7 +2032,7 @@ char* DoComputationsW(float4 *hr, float3 *hv, float3 *ha, SimParams *hparams,
 		InitDiffusion(tBuf, rrDiffuseAv, hparams);
 		// Open file for diffusion.
 		//if( (fileDiffuse = _tfopen(hparams->szDiffusePath, TEXT("w"))) == NULL ){
-		if( (fileDiffuse = fopen(hparams->szDiffusePath, TEXT("w"))) == NULL ){
+		if( (fileDiffuse = fopen(hparams->szDiffusePath, "w")) == NULL ){
 			lstrcpy(szPdbPath, "Cannot open diffuse file!");
 			return szPdbPath;
 		}
@@ -2744,13 +2744,13 @@ int CreatePdbFile(char *szPdb, SimParams *hparams, float4 *r)
 	// To avoid problems with file exstentions.
 	i = hparams->stepCount / hparams->stepPdb;
 	if(i < 100)
-		sprintf(szBuf, TEXT("_%i"), i);
+		sprintf(szBuf, "_%i", i);
 	else if(i < 1000)
-		sprintf(szBuf, TEXT("_%-3i"), i);
+		sprintf(szBuf, "_%-3i", i);
 	else if(i < 10000)
-		sprintf(szBuf, TEXT("_%-4i"), i);
+		sprintf(szBuf, "_%-4i", i);
 
-	lstrcat(szBuf, TEXT(".pdb"));
+	lstrcat(szBuf, ".pdb");
 	lstrcpy(szFileName, szPdb);
 	lstrcat(szFileName, szBuf);	
 
@@ -2817,11 +2817,11 @@ void PrintRdf(SimParams *hparams, uint *hHistRdf)
 	char szFileName[MAX_PATH], szBuf[MAX_PATH];
 	ZeroMemory(szFileName, MAX_PATH);
 	// Define filename.
-	sprintf(szBuf, TEXT("_stepCount_%i_"), hparams->stepCount);	
+	sprintf(szBuf, "_stepCount_%i_", hparams->stepCount);	
 	lstrcpy(szFileName, hparams->szRdfPath);
 	lstrcat(szBuf, hparams->szNameMe);		// Add metal name.
-	lstrcat(szFileName,szBuf);
-	lstrcat(szFileName,TEXT(".txt"));
+	lstrcat(szFileName, szBuf);
+	lstrcat(szFileName, ".txt");
 	// This code in Rapaport is outside of PrintRdf,
 	// but to avoid using real array for histRdf I put this code inside PrintRdf.
 	real normFac = VProd(hparams->particleSize)*Cube(hparams->intervalRdf) / 
@@ -2830,7 +2830,7 @@ void PrintRdf(SimParams *hparams, uint *hHistRdf)
 	normFac = normFac/hparams->nMolMe;
 	normFac = normFac/hparams->nMolMe;
 
-	FILE *rdf = fopen(szFileName,TEXT("w+"));	// Use standard function to open the file.
+	FILE *rdf = fopen(szFileName, "w+");	// Use standard function to open the file.
 
 	real histRdf = 0.f;	
 	
@@ -2838,7 +2838,7 @@ void PrintRdf(SimParams *hparams, uint *hHistRdf)
 	{
 		rb = (n + 0.5f)*hparams->rangeRdf*hparams->lengthU / hparams->sizeHistRdf;
 		histRdf = (real) hHistRdf[n]*normFac / ((n - 0.5f)*(n - 0.5f));
-		fprintf(rdf, TEXT("%8.4f\t %8.4f\n"), rb, histRdf);
+		fprintf(rdf, "%8.4f\t %8.4f\n", rb, histRdf);
 	}
 
 	fclose(rdf);
@@ -2887,11 +2887,11 @@ void PrintDiffusion(real *rrDiffuseAv, FILE *file, SimParams *hparams)
 	real tVal;
 	int j;
 
-	fprintf(file, TEXT("diffusion\n"));
+	fprintf(file, "diffusion\n");
 	for(j = 0; j < hparams->nValDiffuse; j++)
 	{
 		tVal = j * hparams->stepDiffuse * hparams->deltaT;
-		fprintf(file, TEXT("%8.4f %8.4f\n"), tVal, rrDiffuseAv[j]);
+		fprintf(file, "%8.4f %8.4f\n", tVal, rrDiffuseAv[j]);
 	}
 }
 

@@ -11,14 +11,14 @@
 ///////////
 cudaDeviceProp g_hDeviceProp;					// Device properties.
 
-char	g_szAppName[] = TEXT("SurfaceGrowth");	// Application name.
+char	g_szAppName[] = "SurfaceGrowth";	// Application name.
 char*	g_szCmdLine;							// Command line for CudaInitW.
 
 // File variables.
 // Beginning of the file names.
-char	g_szResult[MAX_PATH] = TEXT("sg"),
-		g_szPdb[MAX_PATH] = TEXT("sugr"),
-		g_szRdf[MAX_PATH] = TEXT("rdf");		
+char	g_szResult[MAX_PATH] = "sg",
+		g_szPdb[MAX_PATH] = "sugr",
+		g_szRdf[MAX_PATH] = "rdf";		
 FILE*	g_fResult = NULL;						// Output file descriptor.
 FILE*	g_fPdb = NULL;							// Pdb file.
 FILE*	g_fRdf = NULL;							// Radial distribution function file.
@@ -26,21 +26,21 @@ BOOL	g_bResult = 1;							// Whether to create the output file.
 BOOL	g_bPdb = 1;
 BOOL	g_bRdf = 1;
 
-char *g_szInpFile = TEXT("sugr_in.txt");		// Input file.
+char *g_szInpFile = "sugr_in.txt";		// Input file.
 
 // Backup variables.
-char*	gszBckup[] = {TEXT("bckup0.sugr"),TEXT("bckup1.sugr")};// Note 2 backup files.
+char*	gszBckup[] = {"bckup0.sugr","bckup1.sugr"};// Note 2 backup files.
 BOOL	gbBckup = FALSE;						// Whether to use backup.
 BOOL	gbStartBckup = FALSE;					// Whether to start from backup file.
 int		g_hstepBckup = 10000;					// How often backup file is created.
 
 // Interface variables.
-char*	g_szRegime[] = {TEXT("Bulk"), TEXT("Surface Growth"), TEXT("Shear")};
+char*	g_szRegime[] = {"Bulk", "Surface Growth", "Shear"};
 INT		giRegime = 2;							// Regime of simulation, shear by default.
 
 // Materials.
-char*	g_szMaterial[] = {TEXT("Copper (Cu)"), TEXT("Silver (Ag)"), TEXT("Gold (Au)"), 
-						  TEXT("Nickel (Ni)"), TEXT("Aluminium (Al)"), TEXT("Lead (Pb)")};		// materials
+char*	g_szMaterial[] = {"Copper (Cu)", "Silver (Ag)", "Gold (Au)", 
+						  "Nickel (Ni)", "Aluminium (Al)", "Lead (Pb)"};		// materials
 INT		giMaterial = 3;			// Index of a material in the array of structures, Ni default.
 
 // Many globals are taken from the input file, they provide communications
@@ -108,7 +108,7 @@ int main(int argc, char* argv[])
 	// Exit if there are no CUDA capable devices.
 	cudaGetDeviceCount(&deviceCount);		
 	if (deviceCount == 0){					// Check the number of cuda devices.
-		printf(TEXT("There are no CUDA capable devices!\n"));
+		printf("There are no CUDA capable devices!\n");
 		return 1;	// Exit the application.
 	}		
 	// Get cuda device properties.
@@ -117,13 +117,13 @@ int main(int argc, char* argv[])
 	if( (g_hDeviceProp.major < 1) || 
 		( (g_hDeviceProp.major == 1) && (g_hDeviceProp.minor < 2) ) )
 	{
-		printf(TEXT("Compute capability of your device is less than 1.2!"));
+		printf("Compute capability of your device is less than 1.2!");
 		return 1;						// Exit the application.
 	}
 
 	// Read input parameters.
 	if( ReadInputFile(g_szInpFile) == 0 ) {
-		printf(TEXT("Error with input file! Check it!\n"));
+		printf("Error with input file! Check it!\n");
 		return 1;
 	}
 
@@ -131,30 +131,30 @@ int main(int argc, char* argv[])
 	CudaInitW(argc, (char**)&g_szCmdLine);
 	// Set host parameters and check system size.
 	if (!SetParams()){
-		printf(TEXT("The system is too large (grid = %i blocks)!\n"), g_hSimParams.gridSize);
-		printf(TEXT("The application cannot be launched! Exit!\n"));
+		printf("The system is too large (grid = %i blocks)!\n", g_hSimParams.gridSize);
+		printf("The application cannot be launched! Exit!\n");
 		return 1;	// Exit the application.
 	}			
 
 	// Make preliminary work.
 	if( !SetupJob()){
-		printf(TEXT("Problems with SetupJob!\n"));
+		printf("Problems with SetupJob!\n");
 		return 1; // If error with initial coordinates then exit.
 	}
 
 	// Begin computations.
-	printf(TEXT("Performing computations. Wait...\n"));
+	printf("Performing computations. Wait...\n");
 	char* errorString = 
 		DoComputationsW(g_hr, g_hv, g_ha, &g_hSimParams, g_fResult, g_szPdb);
 
 	if(errorString != 0) {								
-		printf(TEXT("Problems with DoComputationsW! We exit!\n"));
+		printf("Problems with DoComputationsW! We exit!\n");
 		return 1;
 	}
 	
 	FreeArrays();		// Free memory and close files.
 
-	printf(TEXT("Done!\nPress any key to exit.\n"));
+	printf("Done!\nPress any key to exit.\n");
 
 	getchar();
 
@@ -405,10 +405,10 @@ int SetupJob()
 	const char* errorString = InitCoordsW(g_dr, g_hr, &g_hSimParams);	// Wrapper from .cu file.
 	// Check errors.
 	if(errorString != 0) {
-		char szBuf[MAX_PATH] = TEXT("Exception: ");
+		char szBuf[MAX_PATH] = "Exception: ";
 		lstrcat(szBuf, errorString);
-		printf(TEXT("%s\n"), szBuf);
-		printf(TEXT("Problems with initial coordinates! We exit!\n"));
+		printf("%s\n", szBuf);
+		printf("Problems with initial coordinates! We exit!\n");
 		return 0;
 	}
 			
@@ -422,7 +422,7 @@ int SetupJob()
 		char szBuf[MAX_PATH];
 		// Define file name depending on the regime.
 		if(g_hSimParams.iRegime == 0)	// If bulk.
-		sprintf(szBuf, TEXT("_blk_x%i_y%i_z%i_Me%i_Av%i_Pdb%i_T%3.0f"),
+		sprintf(szBuf, "_blk_x%i_y%i_z%i_Me%i_Av%i_Pdb%i_T%3.0f",
 			g_hSimParams.initUcell.x, g_hSimParams.initUcell.y,
 			g_hSimParams.initUcell.z,
 			g_hSimParams.nMolMe,
@@ -430,14 +430,14 @@ int SetupJob()
 			*g_hSimParams.temperatureU);
 		
 		if(g_hSimParams.iRegime == 1)	// If surface growth.
-			sprintf(szBuf, TEXT("_x%i_y%i_Me%i_Eq%i_Dep%i_TD%i_Pdb%i_T%3.0f"),
+			sprintf(szBuf, "_x%i_y%i_Me%i_Eq%i_Dep%i_TD%i_Pdb%i_T%3.0f",
 			g_hSimParams.initUcell.x, g_hSimParams.initUcell.y, 
 			g_hSimParams.nMolMe, g_hSimParams.stepEquil, g_hSimParams.stepDeposit,
 			g_hSimParams.nMolToDeposit, g_hSimParams.stepPdb, g_hSimParams.temperature
 			*g_hSimParams.temperatureU); 
 		
 		if(g_hSimParams.iRegime == 2)	// If shear.
-		sprintf(szBuf, TEXT("_sh_x%i_y%i_Me%i_Eq%i_C%i_Av%i_Pdb%i_T%3.0f"),
+		sprintf(szBuf, "_sh_x%i_y%i_Me%i_Eq%i_C%i_Av%i_Pdb%i_T%3.0f",
 			g_hSimParams.initUcell.x, g_hSimParams.initUcell.y, 
 			g_hSimParams.nMolMe, g_hSimParams.stepEquil, g_hSimParams.stepCool,
 			g_hSimParams.stepAvg, g_hSimParams.stepPdb, 			
@@ -445,12 +445,12 @@ int SetupJob()
 
 		// Modify file name.
 		lstrcat(szBuf, g_hSimParams.szNameMe);
-		lstrcat(szBuf, TEXT(".txt"));
+		lstrcat(szBuf, ".txt");
 		lstrcat(g_szResult, szBuf);		
 
-		g_fResult = fopen(g_szResult, TEXT("w"));	
+		g_fResult = fopen(g_szResult, "w");	
 		fprintf(g_fResult, 
-TEXT("stepCnt\t impulse\t totEn(eV)\t totEn.rms(eV)\t potEn(eV)\t potEn.rms(eV)\t Tempr(K)\t T.rms(K)\t oneStep(ms)\t Veloc_CM\t CM(angstr)\t friction(nN)\t sizex(angstr)\t sizey(angstr)\t sizez(angstr)\t shearForce(nN)\t"));	
+"stepCnt\t impulse\t totEn(eV)\t totEn.rms(eV)\t potEn(eV)\t potEn.rms(eV)\t Tempr(K)\t T.rms(K)\t oneStep(ms)\t Veloc_CM\t CM(angstr)\t friction(nN)\t sizex(angstr)\t sizey(angstr)\t sizez(angstr)\t shearForce(nN)\t");	
 		
 		// Print additional values.
 		if( g_hSimParams.bResult != 0 )
@@ -470,7 +470,7 @@ TEXT("stepCnt\t impulse\t totEn(eV)\t totEn.rms(eV)\t potEn(eV)\t potEn.rms(eV)\
 	}		// End if(g_bResult).
 
 	if(g_hSimParams.iRegime == 2) {	// If shear specify diffuse path.
-		lstrcpy(g_hSimParams.szDiffusePath, TEXT("Diffuse.txt"));
+		lstrcpy(g_hSimParams.szDiffusePath, "Diffuse.txt");
 	}
 
 	return 1;
@@ -637,7 +637,7 @@ int ReadInputFile(char *szInpFile)
 	int iRowCount;
 
 	// Open files.
-	FILE *file = fopen(szInpFile, TEXT("r"));
+	FILE *file = fopen(szInpFile, "r");
 	if( file == NULL )
 		return FALSE;
 
@@ -648,7 +648,7 @@ int ReadInputFile(char *szInpFile)
 	{
 		// Read lines.
 		c = (char)fgetc(file);
-		if( c != TEXT('\n') ) {
+		if( c != '\n' ) {
 			szBuf[iCount] = c;
 			++iCount;			
 			continue;
@@ -656,20 +656,20 @@ int ReadInputFile(char *szInpFile)
 		else
 		{	
 			// Append indication of a string array.
-			szBuf[iCount] = TEXT('\0');
+			szBuf[iCount] = '\0';
 			iCount = 0;
 
 			// Skip blanks.
 			iLocalCnt = 0;
-			while(szBuf[iLocalCnt] == TEXT(' ')) 
+			while(szBuf[iLocalCnt] == ' ') 
 				++iLocalCnt;
 
 			// Skip empty lines.
-			if( szBuf[iLocalCnt] == TEXT('\0') ) 
+			if( szBuf[iLocalCnt] == '\0' ) 
 				continue;
 
 			// If the first character is # then skip the line.
-			if( szBuf[iLocalCnt] == TEXT('#') ) 
+			if( szBuf[iLocalCnt] == '#' ) 
 				continue;
 
 			// Enlarge counter of rows here - it corresponds to the number in the input file.
@@ -678,11 +678,11 @@ int ReadInputFile(char *szInpFile)
 			// Parse the row. Space is a delimeter.
 			iLocalCnt = 0;			
 			while( 1 ) {
-				if( szBuf[iLocalCnt] == TEXT(' ') ) break;
+				if( szBuf[iLocalCnt] == ' ' ) break;
 				szTmp[iLocalCnt] = szBuf[iLocalCnt];
 				++iLocalCnt;
 			}
-			szTmp[iLocalCnt] = TEXT('\0');
+			szTmp[iLocalCnt] = '\0';
 			++iLocalCnt;
 
 			// Analyze what we have read.
